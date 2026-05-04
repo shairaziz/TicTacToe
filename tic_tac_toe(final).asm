@@ -300,41 +300,9 @@ WIN_DONE:
 CHECK_WIN_DRAW ENDP
 
 
-; ================================================================
-; PLACEHOLDER: PLACEHOLDER_COMP_MOVE
-; Picks first empty cell.
-; ================================================================
-PLACEHOLDER_COMP_MOVE PROC
-    PUSH AX
-    PUSH BX
-    PUSH CX
-
-    MOV  CX, 9
-    MOV  BX, 0
-
-SCAN_EMPTY:
-    MOV  BH, 0
-    MOV  AL, BOARD[BX]
-    CMP  AL, 0
-    JE   PLACE_O
-    INC  BX
-    LOOP SCAN_EMPTY
-    JMP  COMP_DONE
-
-PLACE_O:
-    MOV  BH, 0
-    MOV  BOARD[BX], 2       ; 2 = Computer (O)
-
-COMP_DONE:
-    POP  CX
-    POP  BX
-    POP  AX
-    RET
-PLACEHOLDER_COMP_MOVE ENDP
-
 
 ; ================================================================
-; [TEAMMATE 1] Feature 1: DRAW_BOARD goes here
+;  Feature 1: DRAW_BOARD goes here
 ; ================================================================
 DRAW_BOARD PROC
     PUSH AX
@@ -404,7 +372,7 @@ DRAW_BOARD ENDP
 
 
 ; ================================================================
-; [TEAMMATE 1] Feature 2: COMPUTER_MOVE goes here
+;  Feature 2: COMPUTER_MOVE goes here
 ; ================================================================
 COMPUTER_MOVE PROC
     PUSH AX
@@ -604,7 +572,7 @@ TRY_BLOCK_LINE ENDP
 
 
 ; -----------------------------------------------
-; [TEAMMATE 3] Feature 5: SHOW_TURN_INDICATOR
+; Feature 5: SHOW_TURN_INDICATOR
 ; PURPOSE : Print whose turn it is before each move
 ; -----------------------------------------------
 SHOW_TURN_INDICATOR PROC
@@ -632,7 +600,7 @@ TURN_DONE:
 SHOW_TURN_INDICATOR ENDP
 
 ; -----------------------------------------------
-; [YOUR NAME] Feature 6: SHOW_REPLAY_MENU
+; Feature 6: SHOW_REPLAY_MENU
 ; PURPOSE : Show game over screen, ask player to replay or quit
 ; -----------------------------------------------
 SHOW_REPLAY_MENU PROC
@@ -664,7 +632,7 @@ SHOW_REPLAY_MENU PROC
     LEA  DX, MSG_CSCORE
     CALL PRINT_STRING
     MOV  AL, COMP_SCORE
-    ADD  AL, '0'            ; convert to ASCII digit
+    ADD  AL, 30H            ; convert to ASCII digit
     MOV  DL, AL
     MOV  AH, 02h
     INT  21h
@@ -726,7 +694,6 @@ SHOW_REPLAY_MENU ENDP
 ; -----------------------------------------------
 ; Feature 6: RESET_GAME when replay
 ; Clears BOARD array and resets GAME_STATE and CURRENT_TURN
-; Uses loop with PUSH/POP to demonstrate stack + array together
 ; -----------------------------------------------
 
 RESET_GAME PROC
