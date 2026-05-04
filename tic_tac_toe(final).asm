@@ -722,7 +722,7 @@ RESET_LOOP:
 RESET_GAME ENDP
 
 ; -----------------------------------------------
-; ASK_WHO_FIRST
+; Utility : ASK_WHO_FIRST
 ; Ask player to choose who moves first.
 ; P = Player (CURRENT_TURN = 1)
 ; C = Computer (CURRENT_TURN = 2)
