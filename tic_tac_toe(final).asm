@@ -1,6 +1,4 @@
-================================================================
-; TIC-TAC-TOE - Player vs Computer
-; EMU8086 Assembly
+; Group9_11_22201563_23201312_23201273
 
 .MODEL SMALL
 .STACK 100H
@@ -8,8 +6,7 @@
 .DATA
 
     ; ----------------------------------------------------------
-    ; SHARED BOARD ARRAY  <-- ARRAY requirement met here
-    ; Index layout:
+      ; Index layout:
     ;   0 | 1 | 2
     ;   3 | 4 | 5
     ;   6 | 7 | 8
@@ -17,17 +14,17 @@
     ; ----------------------------------------------------------
     BOARD           DB  9 DUP(0)
 
-    ; 1 = Player turn, 2 = Computer turn
-    CURRENT_TURN    DB  1
+   
+    CURRENT_TURN    DB  1     ; 1 = Player turn, 2 = Computer turn
 
-    ; 0=ongoing, 1=Player wins, 2=Computer wins, 3=Draw
-    GAME_STATE      DB  0
+    
+    GAME_STATE      DB  0          ; 0=ongoing, 1=Player wins, 2=Computer wins, 3=Draw
 
-    ; Score counters (persist across replays)
+    ; Score counters 
     PLAYER_SCORE    DB  0
     COMP_SCORE      DB  0
 
-    ; 8 winning lines (3 indices each)
+    ; 8 winning lines 
     WIN_TABLE       DB  0,1,2
                     DB  3,4,5
                     DB  6,7,8
@@ -37,9 +34,8 @@
                     DB  0,4,8
                     DB  2,4,6
 
-    ; ----------------------------------------------------------
-    ; [TEAMMATE 2] Feature 3 & 4 strings
-    ; ----------------------------------------------------------
+     ; Feature 3 & 4 strings
+     
     MSG_INVALID     DB  'Invalid! Try again (1-9, empty cell): $'
     MSG_PLAYER_WIN  DB  'YOU WIN! Congratulations!$'
     MSG_COMP_WIN    DB  'COMPUTER WINS!$'
@@ -49,10 +45,8 @@
     MSG_BAR         DB  ' | $'
     MSG_DASH        DB  '---------',0Dh,0Ah,'$'
 
-    ; ----------------------------------------------------------
-    ; [TEAMMATE 3] Feature 5,6 string
-    ; ----------------------------------------------------------
-    
+     ;  Feature 5,6 string
+       
     MSG_YOUR_TURN   DB  0Dh,0Ah,'>>  YOUR TURN! Enter 1-9',0Dh,0Ah,'$' 
     MSG_COMP_TURN   DB  0Dh,0Ah,'>>  COMPUTER IS THINKING...',0Dh,0Ah,'$' 
     MSG_REPLAY_ASK  DB  0Dh,0Ah,'  Play again?  Y = Yes   N = No',0Dh,0Ah, '  Your choice: $'              
@@ -63,82 +57,73 @@
                     DB  '==================================',0Dh,0Ah
                     DB  '        G A M E   O V E R        ',0Dh,0Ah
                     DB  '==================================',0Dh,0Ah,'$'
-    MSG_WHO_FIRST   DB  0Dh,0Ah,'  Who goes first?  P = Player   C = Computer',0Dh,0Ah,'  Your choice: $'
     MSG_SCORE_HDR   DB  0Dh,0Ah,' - SCOREBOARD - ',0Dh,0Ah,'$'
     MSG_PSCORE      DB  '  You     : $'
     MSG_CSCORE      DB  '  Computer: $' 
+
+    MSG_WHO_FIRST   DB  0Dh,0Ah,'  Who goes first?  P = Player   C = Computer',0Dh,0Ah,'  Your choice: $'
+
     MSG_INVALID_KEY2 DB  0Dh,0Ah, '  Invalid! Press P or C only.',0Dh,0Ah,'$'
 
 
 .CODE
 
-; ================================================================
-; MAIN ENTRY POINT
-; ================================================================
 MAIN PROC
     MOV  AX, @DATA
     MOV  DS, AX
 
-; ----------------------------------------------------------------
-; OUTER LOOP: wraps entire game, re-entered on replay
-; ----------------------------------------------------------------
+
 OUTER_REPLAY_GAME_LOOP:
 
-    ; Reset board and game state for new game
     CALL RESET_GAME
     CALL ASK_WHO_FIRST
 
-; ----------------------------------------------------------------
-; GAME LOOP: one iteration = one turn
-; ----------------------------------------------------------------
+
 GAME_LOOP:
-    ; Check if game already ended
+    ; checks first if game ended alr
     MOV  AL, GAME_STATE
     CMP  AL, 0
-    JNE  SHOW_RESULT        ; someone won or drew
+    JNE  SHOW_RESULT   
 
-    ; Whose turn is it?
+     
+    ; to know whose turn
     MOV  AL, CURRENT_TURN
     CMP  AL, 1
     JE   DO_PLAYER_TURN
     JMP  DO_COMPUTER_TURN
 
-; ----------------------------------------------------------------
-; PLAYER TURN
-; ----------------------------------------------------------------
+; ================================================================
+; [Pushpita] Feature 3: SINGLE PLAYER MODE
+; ================================================================
+
 DO_PLAYER_TURN:
 
-    ; [TEAMMATE 3] Feature 5: Turn Indicator 
-    MOV  AL, 0                                      ; 0 = player turn
+        MOV  AL, 0                                      ; 0 = player turn
     CALL SHOW_TURN_INDICATOR
   
-    ; [TEAMMATE 1] Feature 1: Draw board here when ready
-    
-
-    ; [TEAMMATE 2] Feature 3: read and validate player input
-
-    ; Read one key
+       
+    ; reads one key for board idx
     MOV  AH, 01h
-    INT  21h                ; AL = ASCII key pressed
+    INT  21h              
 
-    ; Convert ASCII '1'-'9' to board index 0-8
+    ; ascii 1-9 to board index 0-8
     MOV  BL, AL
-    SUB  BL, '1'                  ; '1'->0, '2'->1 ... '9'->8
-    MOV  BH, 0                  ; CRITICAL: clear BH always  
+    SUB  BL, '1'                  
+    MOV  BH, 0                 
 
-    ; Range check(0-8)
-    CMP  BL, 0
+    ; out of range
+     CMP  BL, 0
     JL   INVALID_MOVE
     CMP  BL, 8
     JG   INVALID_MOVE
 
-    ; Empty cell check
-    MOV  BH, 0                         ; ensure BH=0 before BOARD[BX]
+    ; empty cell check
+    MOV  BH, 0                         
     MOV  AL, BOARD[BX]
     CMP  AL, 0
     JNE  INVALID_MOVE
 
-    ; Place player mark (1 = X)
+    ; player 1 = X
     MOV  BH, 0
     MOV  BOARD[BX], 1
     CALL PRINT_NEWLINE
@@ -155,31 +140,23 @@ INVALID_MOVE:
     CALL PRINT_NEWLINE
     JMP  GAME_LOOP
 
-; ----------------------------------------------------------------
-; COMPUTER TURN
-; ----------------------------------------------------------------
+
 DO_COMPUTER_TURN:
 
-    ;[TEAMMATE 3]Feature 5: Turn Indicator 
-    MOV  AL, 1                           ; 1 = computer turn
+      MOV  AL, 1                           ; 1 = computer turn
     CALL SHOW_TURN_INDICATOR
-    ; -----------------------------------------------------------
-
-    ; [TEAMMATE 1] Feature 2: AI move
-    CALL COMPUTER_MOVE
+ 
+     CALL COMPUTER_MOVE
 
  CALL DRAW_BOARD
-    ; CALL PLACEHOLDER_COMP_MOVE
-
-    ; [TEAMMATE 2] Feature 4: check win/draw after computer move
+   
+    ; check win/draw after computer move
     CALL CHECK_WIN_DRAW
 
     MOV  CURRENT_TURN, 1    ; switch back to player
     JMP  GAME_LOOP
 
-; ----------------------------------------------------------------
-; SHOW RESULT then go to replay menu
-; ----------------------------------------------------------------
+
 SHOW_RESULT:
     CALL PRINT_NEWLINE
     MOV  AL, GAME_STATE
@@ -207,16 +184,14 @@ COMP_WINS:
     CALL PRINT_STRING
     CALL PRINT_NEWLINE
 
-; ----------------------------------------------------------------
-; [TEAMMATE 3] Feature 6: Replay Menu 
-; ----------------------------------------------------------------
+
 DO_REPLAY_MENU:
-    CALL SHOW_REPLAY_MENU   ; returns AX=1 (replay) or AX=0 (quit)
+    CALL SHOW_REPLAY_MENU   ; if AX=1 then replay or AX=0 then quit
 
     CMP  AX, 1
-    JE   OUTER_REPLAY_GAME_LOOP         ; player said YES, restart game
+    JE   OUTER_REPLAY_GAME_LOOP         
 
-; Player said NO - exit
+
 MOV  AX, 4C00H
 INT  21H
 
@@ -224,11 +199,10 @@ MAIN ENDP
 
 
 
-; -----------------------------------------------
-; [TEAMMATE 2] Feature 4: CHECK_WIN_DRAW
-; Checks 8 win lines then draw.
+; ================================================================
+; [Pushpita] Feature 4: CHECK_WIN_DRAW
 ; Sets GAME_STATE: 1=Player wins, 2=Computer wins, 3=Draw
-; -----------------------------------------------
+; ================================================================
 
 CHECK_WIN_DRAW PROC
     PUSH AX
@@ -253,7 +227,6 @@ WIN_LOOP:
     CMP  AL, AH
     JNE  NEXT_LINE
    
-   ; --- Load index C ---
     MOV  BH, 0
     MOV  BL, WIN_TABLE[SI+2]
     MOV  DL, BOARD[BX]                  ; value at C
@@ -302,7 +275,7 @@ CHECK_WIN_DRAW ENDP
 
 
 ; ================================================================
-;  Feature 1: DRAW_BOARD goes here
+; [Subah] Feature 1: DRAW_BOARD goes here
 ; ================================================================
 DRAW_BOARD PROC
     PUSH AX
@@ -372,7 +345,7 @@ DRAW_BOARD ENDP
 
 
 ; ================================================================
-;  Feature 2: COMPUTER_MOVE goes here
+; [Subah] Feature 2: COMPUTER_MOVE goes here
 ; ================================================================
 COMPUTER_MOVE PROC
     PUSH AX
@@ -380,7 +353,7 @@ COMPUTER_MOVE PROC
     PUSH CX
     PUSH SI
 
-    ; 1) First try to WIN if computer has 2 in a line
+    ; 1) First try to win if computer has 2 in a line
     MOV SI, 0
     MOV CX, 8
 
@@ -570,21 +543,19 @@ BLOCK_DONE:
     RET
 TRY_BLOCK_LINE ENDP
 
+; ================================================================
+; [Shaira] Feature 5: SHOW_TURN_INDICATOR
+; ================================================================
 
-; -----------------------------------------------
-; Feature 5: SHOW_TURN_INDICATOR
-; PURPOSE : Print whose turn it is before each move
-; -----------------------------------------------
 SHOW_TURN_INDICATOR PROC
 
-    PUSH AX                 ; STACK: save turn value
-    PUSH DX                 ; STACK: save DX
+    PUSH AX                 ; turn value
+    PUSH DX                 
 
     CMP  AL, 0
     JE   PRINT_PLAYER_TURN
 
-    ; AL = 1, computer turn
-    LEA  DX, MSG_COMP_TURN
+     LEA  DX, MSG_COMP_TURN
     CALL PRINT_STRING
     JMP  TURN_DONE
 
@@ -593,37 +564,38 @@ PRINT_PLAYER_TURN:
     CALL PRINT_STRING
 
 TURN_DONE:
-    POP  DX                 ; STACK: restore DX
-    POP  AX                 ; STACK: restore AX
+    POP  DX                
+    POP  AX                 
 
     RET
 SHOW_TURN_INDICATOR ENDP
 
-; -----------------------------------------------
-; Feature 6: SHOW_REPLAY_MENU
-; PURPOSE : Show game over screen, ask player to replay or quit
-; -----------------------------------------------
+
+; ================================================================
+; [Shaira] Feature 6: SHOW_REPLAY_MENU
+; ================================================================
+
 SHOW_REPLAY_MENU PROC
 
-    PUSH DX                 ; STACK: save DX
+    PUSH DX                
 
-    ; STACK: push GAME_STATE to preserve game context
+   
     MOV  AL, GAME_STATE
     MOV  AH, 0
-    PUSH AX                 ; STACK: game state saved here
+    PUSH AX                 ; game state saved 
 
-    ; Print game over banner
-    LEA  DX, MSG_GAME_OVER
+    
+    LEA  DX, MSG_GAME_OVER   ; prints game over
     CALL PRINT_STRING
 
-    ; Print scores
-    LEA  DX, MSG_SCORE_HDR
+    
+    LEA  DX, MSG_SCORE_HDR ; prints scores
     CALL PRINT_STRING
 
     LEA  DX, MSG_PSCORE
     CALL PRINT_STRING
     MOV  AL, PLAYER_SCORE
-    ADD  AL, '0'            ; convert to ASCII digit
+    ADD  AL, 30H
     MOV  DL, AL
     MOV  AH, 02h
     INT  21h
@@ -632,7 +604,7 @@ SHOW_REPLAY_MENU PROC
     LEA  DX, MSG_CSCORE
     CALL PRINT_STRING
     MOV  AL, COMP_SCORE
-    ADD  AL, 30H            ; convert to ASCII digit
+    ADD  AL, 30H           
     MOV  DL, AL
     MOV  AH, 02h
     INT  21h
@@ -642,12 +614,10 @@ REPLAY_ASK:
     LEA  DX, MSG_REPLAY_ASK
     CALL PRINT_STRING
 
-    ; Read a single keypress (no echo)
     MOV  AH, 08h
     INT  21h
-    ; AL = key pressed
-
-    ; Accept both lowercase and uppercase
+    
+    ; accepts both lowercase and uppercase
     CMP  AL, 'y'
     JNE  CHECK_N_LOWER
     MOV  AL, 'Y'
@@ -664,7 +634,7 @@ CHECK_YES:
     CMP  AL, 'N'
     JE   WANTS_QUIT
 
-    ; Any other key = invalid, ask again
+    ; any other key 
     LEA  DX, MSG_INVALID_KEY
     CALL PRINT_STRING
     JMP  REPLAY_ASK
@@ -673,28 +643,27 @@ WANTS_REPLAY:
     LEA  DX, MSG_REPLAYING
     CALL PRINT_STRING
 
-    POP  AX                 ; STACK: pop saved game state (clean up)
-    POP  DX                 ; STACK: restore DX
+    POP  AX                 
+    POP  DX                
 
-    MOV  AX, 1              ; return value: 1 = replay
+    MOV  AX, 1              ; 1 = replay
     RET
 
 WANTS_QUIT:
     LEA  DX, MSG_GOODBYE
     CALL PRINT_STRING
 
-    POP  AX                 ; STACK: pop saved game state (clean up)
-    POP  DX                 ; STACK: restore DX
+    POP  AX                 ;saved game state 
+    POP  DX                
 
-    MOV  AX, 0              ; return value: 0 = quit
+    MOV  AX, 0              ;: 0 = quit
     RET
 
 SHOW_REPLAY_MENU ENDP
 
-; -----------------------------------------------
-; Feature 6: RESET_GAME when replay
-; Clears BOARD array and resets GAME_STATE and CURRENT_TURN
-; -----------------------------------------------
+; ================================================================
+; [Shaira] Feature 6: RESET_GAME when replay
+; ================================================================
 
 RESET_GAME PROC
     PUSH AX
@@ -704,7 +673,7 @@ RESET_GAME PROC
     MOV  GAME_STATE,    0
     MOV  CURRENT_TURN,  1
 
-    ; Clear all 9 cells of the BOARD array
+    ; clears all 9 cells 
     MOV  CX, 9
     MOV  BX, 0
     MOV  AL, 0
@@ -722,7 +691,6 @@ RESET_LOOP:
 RESET_GAME ENDP
 
 ; -----------------------------------------------
-; Utility : ASK_WHO_FIRST
 ; Ask player to choose who moves first.
 ; P = Player (CURRENT_TURN = 1)
 ; C = Computer (CURRENT_TURN = 2)
@@ -736,9 +704,9 @@ ASK_FIRST_LOOP:
     CALL PRINT_STRING
 
     MOV  AH, 08h
-    INT  21h                ; AL = key, no echo
+    INT  21h                
 
-    ; Normalize to uppercase
+    
     CMP  AL, 'p'
     JNE  CHECK_C_LOWER
     MOV  AL, 'P'
@@ -774,7 +742,6 @@ ASK_WHO_FIRST ENDP
 
 ; -----------------------------------------------
 ;  UTILITY: PRINT_STRING
-;  Input: DX = address of '$'-terminated string
 ; -----------------------------------------------
 PRINT_STRING PROC
     MOV  AH, 09h
