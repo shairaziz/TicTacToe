@@ -2,6 +2,8 @@
 
 A basic single-player Tic-Tac-Toe game (Player vs Computer) built in x86 Assembly, developed for EMU8086.
 
+Built as a CSE341(Microprocessor) course project.
+
 ## Features
 
 - Formatted 3×3 board display
