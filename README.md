@@ -9,7 +9,7 @@ A basic single-player Tic-Tac-Toe game (Player vs Computer) built in x86 Assembl
 - Single-player mode (vs Computer)
 - Win/draw detection system
 - Turn indicator showing whose turn it is (Player/Computer)
-- Scoreboard Replay option via a menu system
+- Scoreboard and Replay option via a menu system
 
 ## Tech Stack
 
