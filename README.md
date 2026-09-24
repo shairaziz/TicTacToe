@@ -1,8 +1,6 @@
-# Tic-Tac-Toe — x86 Assembly
+# Tic-Tac-Toe (8086 Assembly)
 
 A basic single-player Tic-Tac-Toe game (Player vs Computer) built in x86 Assembly, developed for EMU8086.
-
-Built as a CSE341(Microprocessor) course project.
 
 ## Features
 
